@@ -30,6 +30,14 @@ class SportsPrefs(private val context: Context) {
     val followedPlayers: Flow<Set<String>> =
         context.sportsDataStore.data.map { it[PlayersKey].orEmpty() }
 
+    /**
+     * Followed **sport types** ("soccer", "basketball", …), as the ESPN sport slug every
+     * [SportLeague] carries. A coarser favourite than a league: following a sport puts its fixtures
+     * on Home without naming a competition, which is what Home's hero and rails are grouped by.
+     */
+    val followedSports: Flow<Set<String>> =
+        context.sportsDataStore.data.map { it[SportsKey].orEmpty() }
+
     val hubVisible: Flow<Boolean> =
         context.sportsDataStore.data.map { it[VisibleKey] ?: true }
 
@@ -137,6 +145,13 @@ class SportsPrefs(private val context: Context) {
         }
     }
 
+    suspend fun setSportFollowed(sportKey: String, followed: Boolean) {
+        context.sportsDataStore.edit { prefs ->
+            val current = prefs[SportsKey].orEmpty()
+            prefs[SportsKey] = if (followed) current + sportKey else current - sportKey
+        }
+    }
+
     /** Replace the whole followed-team set at once (the phone picker reconciles in one write). */
     suspend fun setFollowedTeams(keys: Set<String>) {
         context.sportsDataStore.edit { prefs -> prefs[TeamsKey] = keys }
@@ -223,6 +238,7 @@ class SportsPrefs(private val context: Context) {
         private val LeaguesKey = stringSetPreferencesKey("followed_leagues")
         private val TeamsKey = stringSetPreferencesKey("followed_teams")
         private val PlayersKey = stringSetPreferencesKey("followed_players")
+        private val SportsKey = stringSetPreferencesKey("followed_sports")
         private val VisibleKey = booleanPreferencesKey("hub_visible")
         private val LanguagesKey = stringSetPreferencesKey("preferred_languages")
         private val LanguageAskedKey = booleanPreferencesKey("language_asked")

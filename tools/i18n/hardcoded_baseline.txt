@@ -17,6 +17,7 @@
 1	app/src/main/java/tv/own/owntv/features/customize/CustomizeScreen.kt	hid:${entry.key}
 1	app/src/main/java/tv/own/owntv/features/customize/CustomizeViewModel.kt	Custom
 1	app/src/main/java/tv/own/owntv/features/customize/MoveToCategoryDialog.kt	new
+1	app/src/main/java/tv/own/owntv/features/home/HomeSportsRows.kt	·
 1	app/src/main/java/tv/own/owntv/features/live/LiveLanguages.kt	OTHER
 8	app/src/main/java/tv/own/owntv/features/settings/DnsSettingsScreen.kt	\0
 1	app/src/main/java/tv/own/owntv/features/settings/DnsSettingsScreen.kt	${cfg.host}$p
@@ -50,6 +51,7 @@
 1	app/src/main/java/tv/own/owntv/features/sport/SportsMatcher.kt	hockey.
 1	app/src/main/java/tv/own/owntv/features/sport/SportsMatcher.kt	jugend
 1	app/src/main/java/tv/own/owntv/features/sport/SportsMatcher.kt	youth
+1	app/src/main/java/tv/own/owntv/features/sport/SportsPrefs.kt	followed_sports
 1	app/src/main/java/tv/own/owntv/features/sport/SportsPrefs.kt	live_excluded_languages
 1	app/src/main/java/tv/own/owntv/features/sport/SportsPrefs.kt	live_show_other
 1	app/src/main/java/tv/own/owntv/features/sport/SportsScreen.kt	$versus

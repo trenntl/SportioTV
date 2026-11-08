@@ -75,6 +75,7 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import tv.own.owntv.R
+import tv.own.owntv.features.sport.Fixture
 import tv.own.owntv.core.database.dao.TrendingDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.MovieEntity
@@ -112,6 +113,9 @@ import tv.own.owntv.ui.theme.stageAccent
 import tv.own.owntv.ui.theme.stageText
 import java.util.Locale
 
+/** LazyColumn key for Home's sports band, kept beside the row that uses it. */
+private const val SportsBandKey = "sports-band"
+
 /*
  * Home, Stage (P2-01 hero, P2-02 rows, P2-03 pager). With Trending drawn full-bleed, the top of the screen
  * is the trending title over its dissolving backdrop, and Keep watching sits under it in large stills.
@@ -146,6 +150,8 @@ fun HomeScreen(
     onOpenMovie: (MovieEntity) -> Unit,
     onOpenSeries: (SeriesEntity) -> Unit,
     onOpenTrendingSearch: (String) -> Unit,
+    /** Opens a sports fixture: Home's rails hand off to the Sports hub, which owns playback. */
+    onOpenFixture: (Fixture) -> Unit,
     onChildFocused: () -> Unit,
     restoreFocus: Boolean = false,
     restoreTrendingSearchFocus: Boolean = false,
@@ -381,6 +387,23 @@ fun HomeScreen(
                 contentPadding = PaddingValues(top = if (fullBleed || posterItem != null) 0.dp else NoHeroTop, bottom = 48.mpx),
                 verticalArrangement = Arrangement.spacedBy(RowGap),
             ) {
+                // Sports lead Home: a hero fixture, then one rail per sport. A live match is the only
+                // thing on this screen that is happening right now, so it outranks Continue watching —
+                // which is a list of things that already stopped. The band is one LazyColumn item so the
+                // row order and focus restoration below are unaffected by how many sports are on.
+                if (state.sports.hero.isNotEmpty() || state.sports.rows.isNotEmpty()) {
+                    item(key = SportsBandKey) {
+                        SportsBand(
+                            state = state,
+                            start = contentStart,
+                            onOpenFixture = onOpenFixture,
+                            onToggleFollow = vm::toggleSportFollowed,
+                            onChildFocused = onChildFocused,
+                            track = track,
+                        )
+                    }
+                }
+
                 itemsIndexed(renderRows, key = { _, row -> row.name }) { _, row ->
                     val firstItemFocusRequester = rowFocusRequester(row)
                     val rowModifier = if (row == firstRowUnderHero) unfoldOnUp else Modifier

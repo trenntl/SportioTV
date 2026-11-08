@@ -170,4 +170,51 @@
     <string name="sport_ai_functions_description">Channel recommendation in the Sports hub and the AI reading of a pasted provider message</string>
     <string name="sport_ai_functions_off_hint">The AI functions are switched off. Turn them on under Settings › App.</string>
     <string name="sport_ai_error_disabled">The AI functions are switched off in the settings.</string>
+    <!-- Hosted addon (Sports addon source): the StreamFree addon in addon/, deployed on the LAN server. -->
+    <string name="addon_title">Sports addon</string>
+    <string name="addon_address">Addon address</string>
+    <string name="addon_check">Check addon</string>
+    <string name="addon_checking">Checking the addon…</string>
+    <string name="addon_line_check">Fetch the fixture list from the addon</string>
+    <string name="addon_line_ready">Addon reachable</string>
+    <string name="addon_line_failed">The addon did not answer</string>
+    <string name="addon_failed_host">That address could not be resolved. Use the numeric address of the server (for example 192.168.1.71), not a .local name.</string>
+    <string name="addon_failed_unreachable">Nothing answered at that address. Check the port and that the addon is running on the server.</string>
+    <string name="addon_failed_not_addon">Something answered, but it is not this addon.</string>
+    <string name="addon_failed_http">The addon answered with HTTP %1$d</string>
+    <!-- Home's sport rails: one heading per sport type (ESPN sport slug). -->
+    <string name="sport_type_soccer">Football</string>
+    <string name="sport_type_basketball">Basketball</string>
+    <string name="sport_type_football">American football</string>
+    <string name="sport_type_baseball">Baseball</string>
+    <string name="sport_type_hockey">Ice hockey</string>
+    <string name="sport_type_tennis">Tennis</string>
+    <string name="sport_type_golf">Golf</string>
+    <string name="sport_type_racing">Motorsport</string>
+    <string name="sport_type_mma">Combat sports</string>
+    <string name="sport_type_cricket">Cricket</string>
+    <string name="sport_type_rugby">Rugby</string>
+    <string name="sport_type_volleyball">Volleyball</string>
+    <string name="sport_type_other">Sport</string>
+    <!-- Home's sports rails and hero. -->
+    <string name="home_sport_headline">%1$s vs %2$s</string>
+    <string name="home_sport_today">Today %1$s</string>
+    <string name="home_sport_on">%1$s, %2$s</string>
+    <plurals name="home_sport_fixture_count">
+        <item quantity="one">%1$d fixture</item>
+        <item quantity="other">%1$d fixtures</item>
+    </plurals>
+    <string name="addon_status_failed">Failed</string>
+    <string name="addon_live_now">Live now</string>
+    <string name="addon_live">Live</string>
+    <string name="addon_add">Add as source</string>
+    <string name="addon_default_name">StreamFree Sports</string>
+    <string name="addon_no_fixtures">The addon has no fixtures right now. Check back near kick-off.</string>
+    <string name="addon_problem">Problem</string>
+    <string name="addon_help_address">Where the addon is running. The StreamFree addon from this project listens on port 7100 of the server; the address may be typed without http://, it is added for you. The fixtures it publishes arrive as a playlist with a guide, so the Sports hub matches them against ESPN like any other channel.</string>
+    <string name="addon_help_check">Asks the addon for its manifest and its current fixtures. Nothing is saved until you add it.</string>
+    <plurals name="addon_more">
+        <item quantity="one">%1$d more fixture</item>
+        <item quantity="other">%1$d more fixtures</item>
+    </plurals>
 </resources>

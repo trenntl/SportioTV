@@ -1249,6 +1249,9 @@ fun OwnTVShell(
                             onContentScrolled = { contentScrolled = it },
                             // Beside the resting capsule; a docked rail already reserves its own width.
                             onEntryHook = { homeEntry = it },
+                            // Home's fixture rails hand off to the Sports hub, which owns matching and
+                            // playback: a tile is a shortcut to the fixture, not a second player.
+                            onOpenFixture = { onSelectSection(MainSection.SPORT) },
                             contentStart = if (navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) 64.mpx else 150.mpx,
                             modifier = Modifier.fillMaxSize(),
                         )

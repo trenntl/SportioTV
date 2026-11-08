@@ -95,6 +95,15 @@ data class HomeUiState(
     val recentGuide: GuideSliceState = GuideSliceState(),
     val favoriteGuide: GuideSliceState = GuideSliceState(),
     /**
+     * Home's sports board (hero fixtures + one rail per sport), assembled from the Sports hub's ESPN
+     * stack. Empty when nothing is on, or before the first load.
+     */
+    val sports: HomeSports = HomeSports(),
+    /** Which fixture the sports hero shows; wraps around the board's live/followed fixtures. */
+    val activeSportsHeroIndex: Int = 0,
+    /** Sport types the user follows ("soccer", "basketball", …) — the rails' follow toggles. */
+    val followedSports: Set<String> = emptySet(),
+    /**
      * True until the first [HomeViewModel.loadHomeData] completes. Home's queries are profile-scoped and
      * already indexed, but on a cold boot their first reads come off slow eMMC (pages not yet in the OS
      * page cache) — that's the ~half-second gap between the shell painting and `home-data`. While that
@@ -139,6 +148,8 @@ class HomeViewModel(
     private val trendingDao: TrendingDao,
     private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
+    private val sportsFeed: HomeSportsFeed,
+    private val sportsPrefs: tv.own.owntv.features.sport.SportsPrefs,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -380,6 +391,19 @@ class HomeViewModel(
     }
 
     /**
+     * Follow or unfollow a sport type from its Home rail. Following is what feeds the hero: the
+     * board reloads so the fixture set, the hero order and the rails all reflect it at once.
+     */
+    fun toggleSportFollowed(sport: String) {
+        if (sport.isBlank()) return
+        viewModelScope.launch {
+            val followed = runCatching { sportsPrefs.followedSports.first() }.getOrDefault(emptySet())
+            sportsPrefs.setSportFollowed(sport, sport !in followed)
+            refresh()
+        }
+    }
+
+    /**
      * The rails themselves are core's — the phone app builds the same feed from the same reader. What
      * stays here is what only a television does with it: the caches keyed to the previous pass, and the
      * hero carousel's position.
@@ -387,6 +411,10 @@ class HomeViewModel(
     private suspend fun loadHomeData(profileId: Long) {
         val previous = _uiState.value
         val data = feed.load(profileId)
+        // The sports board is a second, independent source: a slow or failing ESPN must never hold up
+        // the rails above it, so it loads beside them and an empty result just draws no sports rows.
+        val sports = runCatching { sportsFeed.load() }.getOrDefault(HomeSports())
+        val followedSports = runCatching { sportsPrefs.followedSports.first() }.getOrDefault(emptySet())
         _uiState.value = HomeUiState(
             trendingItems = data.trendingItems,
             activeTrendingIndex = previous.activeTrendingIndex
@@ -394,7 +422,7 @@ class HomeViewModel(
             trendingPreferredLanguage = data.trendingPreferredLanguage,
             trendingSeasonCounts = data.trendingSeasonCounts,
             trendingExtras = previous.trendingExtras.filterKeys { key -> data.trendingItems.any { it.stableKey == key } },
-            heroItems = data.heroItems,
+            heroItems = freshLiveHeroes(data.heroItems, data.recentGuide),
             activeHeroIndex = 0,
             continueMovies = data.continueMovies,
             continueSeries = data.continueSeries,
@@ -406,6 +434,8 @@ class HomeViewModel(
             config = data.config,
             recentGuide = data.recentGuide,
             favoriteGuide = data.favoriteGuide,
+            sports = sports,
+            followedSports = followedSports,
             isLoading = false,
         )
         tv.own.owntv.core.util.Perf.stamp("home-data")
@@ -414,8 +444,21 @@ class HomeViewModel(
         _uiState.value.heroItems.indices.forEach { resolveHeroMetadata(it) }
     }
 
-    private fun resolveHeroMetadata(index: Int) {
-        val item = _uiState.value.heroItems.getOrNull(index) ?: return
+    /**
+     * Continue watching must not offer a live channel whose programme has already ended — tapping it
+     * opens a channel sitting between shows, which is exactly the "resume something that is over"
+     * dead end. Only channels the guide actually knows are judged: a playlist with no guide keeps
+     * its cards, because there is nothing to judge them by.
+     */
+    private fun freshLiveHeroes(items: List<HeroItem>, guide: GuideSliceState): List<HeroItem> =
+        items.filter { item ->
+            if (item !is HeroItem.LiveHero) return@filter true
+            val programmes = guide.programmes[item.channel.id] ?: return@filter true
+            if (programmes.isEmpty()) return@filter true
+            programmes.any { guide.now >= it.startMs && guide.now < it.stopMs }
+        }
+
+    private fun resolveHeroMetadata(index: Int) {        val item = _uiState.value.heroItems.getOrNull(index) ?: return
         if (item is HeroItem.LiveHero) return
 
         val key = item.homeKey

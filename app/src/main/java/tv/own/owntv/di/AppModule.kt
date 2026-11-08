@@ -16,6 +16,7 @@ import tv.own.owntv.core.content.SearchReader
 import tv.own.owntv.core.home.HomeFeedReader
 import tv.own.owntv.core.live.GuideReader
 import tv.own.owntv.core.live.LiveEpgReader
+import tv.own.owntv.features.home.HomeSportsFeed
 import tv.own.owntv.features.home.HomeViewModel
 import tv.own.owntv.features.live.LiveViewModel
 import tv.own.owntv.features.movies.MovieViewModel
@@ -216,6 +217,10 @@ val appModule = module {
     single<LiveSourceIdsProvider> { ProfileLiveSourceIdsProvider(get(), get()) }
     singleOf(::SportsMatcher)
     singleOf(::SportsPrefs)
+    // Home's sports board: one board assembled across the followed/active leagues, grouped by sport
+    // type. It reads the same EspnApi and SportsPrefs the hub does — Home adds selection, not a
+    // second fixture source.
+    singleOf(::HomeSportsFeed)
     viewModelOf(::SportsViewModel)
     // Reads a pasted provider message for the companion page: the local rules plus the AI. The
     // core controller gets it as a hook (core must not import the app's AI client).
